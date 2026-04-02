@@ -6,6 +6,8 @@ menggunakan podman untuk containerization, dan quadlet untuk mengelola container
 podman build -t authenticate-backend ./backend
 podman build -t localhost/authenticate-backend:latest -f backend/Containerfile ./backend
 podman build -t authenticate-frontend ./frontend
+podman build -t localhost/authenticate-frontend:latest -f frontend/Containerfile ./frontend
+
 ```
 ### konfigurasi quadlet
 ```bash
@@ -48,4 +50,11 @@ systemctl --user status auth-network.service
 systemctl --user status auth-db.service
 systemctl --user status auth-backend.service
 systemctl --user status auth-frontend.service
+```
+### restart container service
+```bash
+systemctl --user restart auth-network.service
+systemctl --user restart auth-db.service
+systemctl --user restart auth-backend.service
+systemctl --user restart auth-frontend.service
 ```

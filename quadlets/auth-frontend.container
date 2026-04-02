@@ -6,7 +6,7 @@ ContainerName=auth-frontend
 Image=localhost/authenticate-frontend:latest
 Environment=API_URL=http://auth-backend:8080
 Network=auth.network
-ExposeHostPort=3000
+PublishPort=3000:3000
 
 [Install]
 WantedBy=multi-user.target default.target

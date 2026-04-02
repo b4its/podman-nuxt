@@ -1,0 +1,7 @@
+/* assets/css/main.css */
+@import "tailwindcss";
+
+/* Kamu bisa menambahkan layer custom di sini jika mau */
+@theme {
+  --color-brand: #3b82f6;
+}

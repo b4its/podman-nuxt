@@ -1,0 +1,26 @@
+# Stage 1: Build
+FROM oven/bun:1.1 as builder
+WORKDIR /app
+
+# Menyalin file konfigurasi dependensi
+COPY package.json bun.lock*
+
+# Instalasi dependensi menggunakan Bun
+RUN bun install --frozen-lockfile
+
+# Menyalin seluruh source code dan melakukan build
+COPY . .
+RUN bun run build
+
+# Stage 2: Runtime
+FROM oven/bun:1.1-slim
+WORKDIR /app
+
+# Menyalin hasil build dari stage sebelumnya
+COPY --from=builder /app/.output ./.output
+
+# Ekspos port default Nuxt (3000)
+EXPOSE 3000
+
+# Menjalankan server Nuxt menggunakan runtime Bun
+CMD ["bun", ".output/server/index.mjs"]

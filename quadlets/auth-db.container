@@ -1,0 +1,11 @@
+[Unit]
+Description=PostgreSQL Database for Auth Project
+
+[Container]
+Image=docker.io/library/postgres:15-alpine
+Environment=POSTGRES_USER=admin POSTGRES_PASSWORD=secret POSTGRES_DB=auth_db
+Volume=auth_db_data:/var/lib/postgresql/data:Z
+Network=auth.network
+
+[Install]
+WantedBy=multi-user.target default.target

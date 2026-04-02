@@ -1,0 +1,51 @@
+## Rust Clean Architecture with Nuxt Framework
+menggunakan podman untuk containerization, dan quadlet untuk mengelola container, pod, volume, dan jaringan pakai unit systemd
+
+### build images
+```bash
+podman build -t authenticate-backend ./backend
+podman build -t localhost/authenticate-backend:latest -f backend/Containerfile ./backend
+podman build -t authenticate-frontend ./frontend
+```
+### konfigurasi quadlet
+```bash
+mkdir -p ~/.config/systemd/user/
+cp quadlets/* ~/.config/systemd/user/
+
+# link container ke systemd
+mkdir -p ~/.config/containers/systemd/auth-nuxt
+ln -sf ~/programming/rust/cargoRs/nuxt-podman/quadlets/* ~/.config/containers/systemd/auth-nuxt/
+ln -sf ~/programming/rust/cargoRs/nuxt-podman/quadlets/*.container ~/.config/containers/systemd/auth-nuxt/
+ln -sf ~/programming/rust/cargoRs/nuxt-podman/quadlets/auth-net.network ~/.config/containers/systemd/auth-nuxt/auth.network
+
+systemctl --user daemon-reload
+```
+# jalankan network dan service yang lain
+```bash
+systemctl --user start auth-network.service
+
+# Jalankan sisanya
+systemctl --user start auth-db.service
+systemctl --user start auth-backend.service
+systemctl --user start auth-frontend.service
+```
+
+### jalankan container podman
+```bash
+systemctl --user daemon-reload
+systemctl --user start auth-network.service
+systemctl --user start auth-db.service
+```
+
+### cek unit list
+```bash
+systemctl --user list-unit-files | grep auth
+```
+
+### cek container status
+```bash
+systemctl --user status auth-network.service
+systemctl --user status auth-db.service
+systemctl --user status auth-backend.service
+systemctl --user status auth-frontend.service
+```

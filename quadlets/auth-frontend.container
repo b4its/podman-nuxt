@@ -1,0 +1,12 @@
+[Unit]
+Description=Nuxt Frontend Service
+
+[Container]
+ContainerName=auth-frontend
+Image=localhost/authenticate-frontend:latest
+Environment=API_URL=http://auth-backend:8080
+Network=auth.network
+ExposeHostPort=3000
+
+[Install]
+WantedBy=multi-user.target default.target

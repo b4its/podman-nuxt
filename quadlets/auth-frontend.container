@@ -1,9 +1,18 @@
 [Unit]
-Description=Nuxt Frontend Service
+Description=Nuxt Frontend Dev Service
 
 [Container]
-ContainerName=auth-frontend
+ContainerName=auth-frontend-dev
+
 Image=localhost/authenticate-frontend:latest
+
+# HUBUNGKAN LAPTOP KE CONTAINER
+Volume=/home/markx/programming/rust/cargoRs/nuxt-podman/frontend:/app:Z
+WorkingDir=/app
+
+# JALANKAN MODE DEV (Menimpa CMD di Containerfile)
+Exec=bun run dev --host 0.0.0.0
+
 Environment=API_URL=http://auth-backend:8080
 Network=auth.network
 PublishPort=3000:3000

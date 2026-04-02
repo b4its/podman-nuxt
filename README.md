@@ -7,7 +7,7 @@ podman build -t authenticate-backend ./backend
 podman build -t localhost/authenticate-backend:latest -f backend/Containerfile ./backend
 podman build -t authenticate-frontend ./frontend
 podman build -t localhost/authenticate-frontend:latest -f frontend/Containerfile ./frontend
-
+podman build --no-cache --progress plain -t localhost/authenticate-frontend:latest -f frontend/Containerfile ./frontend
 ```
 ### konfigurasi quadlet
 ```bash
@@ -22,7 +22,7 @@ ln -sf ~/programming/rust/cargoRs/nuxt-podman/quadlets/auth-net.network ~/.confi
 
 systemctl --user daemon-reload
 ```
-# jalankan network dan service yang lain
+### jalankan network dan service yang lain
 ```bash
 systemctl --user start auth-network.service
 
@@ -39,9 +39,21 @@ systemctl --user start auth-network.service
 systemctl --user start auth-db.service
 ```
 
+### masuk ke frontend bash
+```bash
+podman exec -it auth-frontend bash
+podman run --rm -v .:/app -w /app oven/bun:latest bun install
+```
+
+
 ### cek unit list
 ```bash
 systemctl --user list-unit-files | grep auth
+```
+
+### untuk melihat log frontend:
+```bash
+podman logs -f auth-frontend-dev
 ```
 
 ### cek container status

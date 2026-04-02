@@ -134,3 +134,25 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import { useLogin } from '../../assets/js/login.js'
+
+// Destructure nilai dari composable
+const {
+  form,
+  focused,
+  showPass,
+  isLoading,
+  features,
+  ripple,
+  handleLogin
+} = useLogin()
+
+// Set metadata halaman
+useHead({ title: 'Login — NuxPodman' })
+</script>
+
+<style scoped>
+@import "../../assets/css/login.css";
+</style>

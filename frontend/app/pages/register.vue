@@ -174,7 +174,7 @@
             <NuxtLink to="/" class="go-login-btn">Masuk Sekarang →</NuxtLink>
           </div>
 
-          <div class="form-footer">
+          <div class="form-footer" style="margin-top: 2em;">
             <span>Sudah punya akun?</span>
             <NuxtLink to="/" class="switch-link">Masuk di sini →</NuxtLink>
           </div>
@@ -214,3 +214,26 @@
   </div>
 </template>
 
+<script setup>
+
+import {
+  form,
+  steps,
+  currentStep,
+  focused,
+  showPass,
+  showPass2,
+  isLoading,
+  success,
+  handleStep,
+  strengthClass,
+  strengthTextClass,
+  strengthLabel
+} from '../../assets/js/register.js'
+
+useHead({ title: 'Daftar — NuxPodman' })
+</script>
+
+<style scoped>
+@import "../../assets/css/register.css";
+</style>

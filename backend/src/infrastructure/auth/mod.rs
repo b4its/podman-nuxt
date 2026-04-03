@@ -30,6 +30,6 @@ pub fn create_jwt(user_id: &str) -> Result<String, jsonwebtoken::errors::Error> 
         sub: user_id.to_owned(),
         exp: expiration as usize,
     };
-    // Ganti "secret" dengan env variable untuk production
+
     encode(&Header::default(), &claims, &EncodingKey::from_secret("secret".as_ref()))
 }

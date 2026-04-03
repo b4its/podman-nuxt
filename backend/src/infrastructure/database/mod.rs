@@ -14,7 +14,6 @@ impl PostgresUserRepository {
 #[async_trait::async_trait]
 impl UserRepository for PostgresUserRepository {
     async fn save(&self, user: &User) -> Result<(), String> {
-        // Query disesuaikan dengan struktur: id, name, email, password
         sqlx::query("INSERT INTO users (id, name, email, password) VALUES ($1, $2, $3, $4)")
             .bind(user.id)
             .bind(&user.name)

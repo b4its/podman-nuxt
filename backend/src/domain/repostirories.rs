@@ -1,6 +1,5 @@
 use super::entities::User;
 
-// Trait ini yang membuat database modular. 
 // Application layer hanya akan memanggil fungsi di trait ini.
 #[async_trait::async_trait]
 pub trait UserRepository: Send + Sync {

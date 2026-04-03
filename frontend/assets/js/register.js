@@ -1,53 +1,94 @@
 import { ref, reactive, computed } from 'vue'
 
-export const steps = ['Identitas', 'Keamanan', 'Konfirmasi']
-export const currentStep = ref(0)
-export const focused = ref(null)
-export const showPass = ref(false)
-export const showPass2 = ref(false)
-export const isLoading = ref(false)
-export const success = ref(false)
+// Bungkus semua dalam fungsi export
+export const useRegister = () => {
+  // Panggil composable Nuxt di sini (aman)
+  const config = useRuntimeConfig()
+  const router = useRouter()
+  const API_URL = config.public.apiBase
 
-export const form = reactive({
-  firstName: '', lastName: '', email: '', phone: '',
-  password: '', confirmPassword: '', agree: false
-})
+  // State didefinisikan di dalam fungsi
+  const steps = ['Identitas', 'Keamanan', 'Konfirmasi']
+  const currentStep = ref(0)
+  const focused = ref(null)
+  const showPass = ref(false)
+  const showPass2 = ref(false)
+  const isLoading = ref(false)
+  const success = ref(false)
+  const errorMessage = ref('')
 
-export const stats = [
-  { val: '50K+', desc: 'Pengguna aktif' },
-  { val: '99.9%', desc: 'Uptime server' },
-  { val: '256-bit', desc: 'Enkripsi SSL' },
-]
+  const form = reactive({
+    firstName: '', lastName: '', email: '', phone: '',
+    password: '', confirmPassword: '', agree: false
+  })
 
-// Password strength
-export const passwordStrength = computed(() => {
-  const p = form.password
-  if (!p) return 0
-  let score = 0
-  if (p.length >= 8) score++
-  if (/[A-Z]/.test(p)) score++
-  if (/[0-9]/.test(p)) score++
-  if (/[^A-Za-z0-9]/.test(p)) score++
-  return score
-})
+  // Password strength logic
+  const passwordStrength = computed(() => {
+    const p = form.password
+    if (!p) return 0
+    let score = 0
+    if (p.length >= 8) score++
+    if (/[A-Z]/.test(p)) score++
+    if (/[0-9]/.test(p)) score++
+    if (/[^A-Za-z0-9]/.test(p)) score++
+    return score
+  })
 
-export const strengthLabel = computed(() => ['', 'Lemah', 'Cukup', 'Kuat', 'Sangat Kuat'][passwordStrength.value])
-export const strengthTextClass = computed(() => ['', 'weak', 'fair', 'good', 'strong'][passwordStrength.value])
+  const strengthLabel = computed(() => ['', 'Lemah', 'Cukup', 'Kuat', 'Sangat Kuat'][passwordStrength.value])
+  const strengthTextClass = computed(() => ['', 'weak', 'fair', 'good', 'strong'][passwordStrength.value])
 
-export function strengthClass(i) {
-  const s = passwordStrength.value
-  if (i > s) return ''
-  return ['', 'weak', 'fair', 'good', 'strong'][s]
-}
-
-export async function handleStep() {
-  if (currentStep.value < 2) {
-    currentStep.value++
-    return
+  function strengthClass(i) {
+    const s = passwordStrength.value
+    if (i > s) return ''
+    return ['', 'weak', 'fair', 'good', 'strong'][s]
   }
-  if (!form.agree) return
-  isLoading.value = true
-  await new Promise(r => setTimeout(r, 2000))
-  isLoading.value = false
-  success.value = true
+
+  async function handleStep() {
+    if (currentStep.value < 2) {
+      currentStep.value++
+      return
+    }
+
+    if (!form.agree) {
+      errorMessage.value = "Anda harus menyetujui syarat dan ketentuan."
+      return
+    }
+
+    isLoading.value = true
+    errorMessage.value = ""
+
+    console.log("Data yang akan dikirim ke Rust:", {
+      name: `${form.firstName} ${form.lastName}`.trim(),
+      email: form.email,
+      password: form.password
+    })
+    try {
+      const response = await $fetch(`${API_URL}/api/register`, {
+        method: 'POST',
+        body: {
+          name: `${form.firstName} ${form.lastName}`.trim(),
+          email: form.email,
+          password: form.password
+        }
+      })
+
+      isLoading.value = false
+      success.value = true
+
+      setTimeout(() => {
+        router.push('/') // Redirect ke login (sesuai route NuxtLink Anda)
+      }, 3000)
+
+    } catch (err) {
+      isLoading.value = false
+      errorMessage.value = err.data?.message || err.data || "Gagal mendaftarkan akun."
+    }
+  }
+
+  // Kembalikan semua yang dibutuhkan UI
+  return {
+    form, steps, currentStep, focused, showPass, showPass2,
+    isLoading, success, errorMessage, handleStep,
+    strengthClass, strengthTextClass, strengthLabel
+  }
 }

@@ -4,11 +4,12 @@ mod infrastructure;
 mod interface;
 
 // 1. FIXED: Tambahkan 'get' pada import routing
-use axum::{routing::{get, post}, Router};
+use axum::{routing::{get, post}, Router, http::Method};
 use dotenvy::dotenv;
 use sqlx::PgPool;
 use std::sync::Arc;
 use std::env;
+use tower_http::cors::{Any, CorsLayer};
 
 use crate::application::AuthUseCase;
 use crate::infrastructure::database::PostgresUserRepository;
@@ -61,7 +62,6 @@ async fn main() {
     let pool = PgPool::connect(&db_url).await.expect("Failed to connect to DB");
 
     // 2. Setup Repository (Infrastructure Layer)
-    // PgPool sangat ringan untuk di-clone karena menggunakan Arc internal
     let user_repo = Arc::new(PostgresUserRepository::new(pool.clone()));
 
     // 3. Setup Use Case (Application Layer)
@@ -70,8 +70,17 @@ async fn main() {
     // 4. Setup State untuk Controller (Interface Layer)
     let state = Arc::new(AppState { 
         auth_use_case,
-        pool: pool.clone() // Pastikan struct AppState sudah diupdate menerima field ini
+        pool: pool.clone() 
     });
+
+    let cors = CorsLayer::new()
+        // Izinkan origin dari Nuxt (untuk development bisa pakai Any, 
+        // tapi lebih aman sebutkan IP-nya)
+        .allow_origin(Any) 
+        // Izinkan Method yang dibutuhkan, termasuk OPTIONS untuk preflight
+        .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+        // Izinkan header Content-Type agar JSON bisa terkirim
+        .allow_headers(Any);
 
     // 5. Setup Router Axum
     let app = Router::new()
@@ -80,6 +89,7 @@ async fn main() {
         .route("/api/users", get(get_all_users_handler))      
         .route("/api/users/{id}", get(get_user_by_id_handler))
         .route("/api/health", get(health_handler)) 
+        .layer(cors)
         .with_state(state);
 
     let port = env::var("PORT").unwrap_or_else(|_| "8080".to_string());

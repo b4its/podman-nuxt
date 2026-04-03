@@ -5,6 +5,7 @@ menggunakan podman untuk containerization, dan quadlet untuk mengelola container
 ```bash
 podman build -t authenticate-backend ./backend
 podman build -t localhost/authenticate-backend:latest -f backend/Containerfile ./backend
+podman build --no-cache --progress plain -t localhost/authenticate-backend:latest -f backend/Containerfile ./backend
 podman build -t authenticate-frontend ./frontend
 podman build -t localhost/authenticate-frontend:latest -f frontend/Containerfile ./frontend
 podman build --no-cache --progress plain -t localhost/authenticate-frontend:latest -f frontend/Containerfile ./frontend
@@ -69,4 +70,17 @@ systemctl --user restart auth-network.service
 systemctl --user restart auth-db.service
 systemctl --user restart auth-backend.service
 systemctl --user restart auth-frontend.service
+```
+
+### untuk mencari service tersedia
+```bash
+systemctl --user list-units --type=service
+systemctl --user list-units --type=service | grep auth
+```
+### untuk menjalankan migration pada posgresql
+```bash
+sqlx migrate add -r create_users_table
+sqlx database create
+
+sqlx migrate run
 ```

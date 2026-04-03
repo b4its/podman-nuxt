@@ -14,6 +14,11 @@ export default defineNuxtConfig({
       "@tailwindcss/postcss": {}, // Ini plugin khusus untuk Tailwind v4
     },
   },
+  runtimeConfig: {
+    public: {
+      apiBase: (process.env.RUST_PUBLIC_API_BASE as string) || 'http://localhost:8080'
+    }
+  },
   
   devtools: { enabled: true },
   app: {

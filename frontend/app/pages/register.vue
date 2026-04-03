@@ -215,21 +215,39 @@
 </template>
 
 <script setup>
+import { useRegister } from '../../assets/js/register.js'
+import toastr from 'toastr'
+import 'toastr/build/toastr.min.css'
 
-import {
-  form,
-  steps,
-  currentStep,
-  focused,
-  showPass,
-  showPass2,
-  isLoading,
-  success,
-  handleStep,
-  strengthClass,
-  strengthTextClass,
-  strengthLabel
-} from '../../assets/js/register.js'
+// Destructure semua property dari useRegister
+const {
+  form, steps, currentStep, focused, showPass, showPass2,
+  isLoading, success, errorMessage, handleStep,
+  strengthClass, strengthTextClass, strengthLabel
+} = useRegister()
+
+// Konfigurasi Toastr
+toastr.options = {
+  "closeButton": true,
+  "progressBar": true,
+  "positionClass": "toast-top-right",
+  "timeOut": "3000",
+  "extendedTimeOut": "1000",
+}
+
+// Watcher untuk Error Message
+watch(errorMessage, (newVal) => {
+  if (newVal) {
+    toastr.error(newVal, 'Pendaftaran Gagal')
+  }
+})
+
+// Watcher untuk Success (Opsional jika ingin notif selain overlay)
+watch(success, (isSuccess) => {
+  if (isSuccess) {
+    toastr.success(`Selamat bergabung, ${form.firstName}!`, 'Berhasil')
+  }
+})
 
 useHead({ title: 'Daftar — NuxPodman' })
 </script>

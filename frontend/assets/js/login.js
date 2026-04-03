@@ -1,10 +1,15 @@
 import { ref, reactive } from 'vue'
 
 export function useLogin() {
+  const router = useRouter()
+  const config = useRuntimeConfig() // FIXED: Definisikan config
+  
   const form = reactive({ email: '', password: '', remember: false })
   const focused = ref(null)
   const showPass = ref(false)
   const isLoading = ref(false)
+  
+  const API_URL = config.public.apiBase
 
   const features = [
     { icon: '🔐', label: 'Enkripsi end-to-end' },
@@ -12,43 +17,58 @@ export function useLogin() {
     { icon: '🛡️', label: 'Proteksi 2FA' },
   ]
 
-  function ripple(e) {
-    const btn = e.currentTarget
-    const circle = document.createElement('span')
-    const r = Math.max(btn.offsetWidth, btn.offsetHeight)
-    const rect = btn.getBoundingClientRect()
-    circle.style.cssText = `
-      position:absolute;border-radius:50%;background:rgba(255,255,255,0.2);
-      width:${r}px;height:${r}px;top:${e.clientY - rect.top - r/2}px;
-      left:${e.clientX - rect.left - r/2}px;transform:scale(0);
-      animation:ripple 0.5s ease-out;pointer-events:none;
-    `
-    btn.style.position = 'relative'
-    btn.style.overflow = 'hidden'
-    btn.appendChild(circle)
-    setTimeout(() => circle.remove(), 600)
-  }
-
   async function handleLogin() {
-    if (!form.email || !form.password) return
+    // FIXED: Import toastr secara dinamis agar hanya berjalan di Client-side
+    const toastr = (await import('toastr')).default
+    await import('toastr/build/toastr.min.css')
+
+    // Konfigurasi Toastr
+    toastr.options = {
+      "closeButton": true,
+      "progressBar": true,
+      "positionClass": "toast-top-right",
+      "timeOut": "3000"
+    }
+
+    if (!form.email || !form.password) {
+      toastr.warning('Harap isi semua field', 'Peringatan')
+      return
+    }
     
     isLoading.value = true
     
-    // TODO: Integrasikan endpoint API autentikasi Laravel 13.x di sini.
-    // Pastikan session/token selaras dengan arsitektur Filament 5.x.
-    await new Promise(r => setTimeout(r, 1800))
-    
-    isLoading.value = false
+    try {
+      const response = await $fetch(`${API_URL}/api/login`, {
+        method: 'POST',
+        body: {
+          email: form.email,
+          password: form.password
+        }
+      })
+
+      toastr.success('Login berhasil! Mengalihkan...', 'Sukses')
+      
+      const token = useCookie('auth_token')
+      token.value = response.token 
+
+      setTimeout(() => {
+        router.push('/dashboard')
+      }, 1000)
+
+    } catch (err) {
+      const msg = err.data?.message || 'Email atau Password salah'
+      toastr.error(msg, 'Login Gagal')
+    } finally {
+      isLoading.value = false
+    }
   }
 
-  // Ekspor semua yang dibutuhkan oleh template
   return {
     form,
     focused,
     showPass,
     isLoading,
     features,
-    ripple,
     handleLogin
   }
 }

@@ -17,7 +17,6 @@ impl AuthUseCase {
             return Err("Email already exists".to_string());
         }
 
-        // Hash password sebelum disimpan, meskipun nama kolom/field-nya "password"
         let hashed = hash_password(&password).map_err(|e| e.to_string())?;
         let user = User::new(name, email, hashed);
 

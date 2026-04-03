@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
-    pub id: Uuid, // ID tetap dibutuhkan sebagai Primary Key di database
+    pub id: Uuid, // ID sebagai Primary Key di database
     pub name: String,
     pub email: String,
     pub password: String, 

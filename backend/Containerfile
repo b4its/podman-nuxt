@@ -1,30 +1,25 @@
 # Stage 1: Build
-FROM rust:1.94.1-slim AS builder
+FROM rust:1.94-slim AS builder
 WORKDIR /app
 
-# Optimasi layer: Copy Cargo.toml dulu untuk caching (jika ada dependencies nanti)
+# Install dependencies untuk build (misal pkg-config, libssl-dev jika diperlukan sqlx)
+RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/lib/apt/lists/*
+
 COPY Cargo.toml ./
-# Jika ada Cargo.lock, tambahkan: COPY Cargo.lock ./
+COPY Cargo.lock ./ 
 
-# Copy source code
 COPY src ./src
-
-# Build binary
 RUN cargo build --release
 
 # Stage 2: Runtime
 FROM debian:bookworm-slim
 WORKDIR /app
 
-# Install dependencies yang dibutuhkan runtime (openssl, ca-certificates, dll)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Sesuaikan nama binary hasil build dari Cargo.toml (name = "auth")
 COPY --from=builder /app/target/release/auth .
 
 EXPOSE 8080
-
-# Gunakan nama binary yang benar
 CMD ["./auth"]

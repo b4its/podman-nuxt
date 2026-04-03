@@ -1,8 +1,10 @@
 import { ref, reactive } from 'vue'
+import { useAuth } from '../../composables/useAuth'
 
 export function useLogin() {
   const router = useRouter()
-  const config = useRuntimeConfig() // FIXED: Definisikan config
+  const config = useRuntimeConfig() 
+  const { isLoggedIn } = useAuth()
   
   const form = reactive({ email: '', password: '', remember: false })
   const focused = ref(null)
@@ -46,14 +48,17 @@ export function useLogin() {
         }
       })
 
-      toastr.success('Login berhasil! Mengalihkan...', 'Sukses')
-      
-      const token = useCookie('auth_token')
+      // SIMPAN TOKEN (Gunakan konfigurasi cookie yang aman)
+      const token = useCookie('auth_token', {
+        maxAge: form.remember ? 60 * 60 * 24 * 7 : undefined, // 7 hari jika 'remember'
+        path: '/'
+      })
       token.value = response.token 
 
-      setTimeout(() => {
-        router.push('/dashboard')
-      }, 1000)
+      toastr.success('Login berhasil!', 'Sukses')
+      
+      // Gunakan replace agar history login tidak bisa di-back
+      setTimeout(() => router.replace('/dashboard'), 500)
 
     } catch (err) {
       const msg = err.data?.message || 'Email atau Password salah'

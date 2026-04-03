@@ -9,6 +9,7 @@ podman build --no-cache --progress plain -t localhost/authenticate-backend:lates
 podman build -t authenticate-frontend ./frontend
 podman build -t localhost/authenticate-frontend:latest -f frontend/Containerfile ./frontend
 podman build --no-cache --progress plain -t localhost/authenticate-frontend:latest -f frontend/Containerfile ./frontend
+
 ```
 ### konfigurasi quadlet
 ```bash
@@ -83,4 +84,9 @@ sqlx migrate add -r create_users_table
 sqlx database create
 
 sqlx migrate run
+```
+
+### bersihkan package
+```bash
+rm -rf .nuxt .output node_modules/.cache
 ```

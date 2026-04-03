@@ -1,6 +1,6 @@
+
 <template>
-  <div class="auth-page">
-    <AnimatedBackground />
+  <div class="auth-paged">
 
     <div class="auth-container">
       <div class="form-panel">
@@ -215,37 +215,46 @@
 </template>
 
 <script setup>
+definePageMeta({
+  layout: 'auth'
+})
 import { useRegister } from '../../assets/js/register.js'
-import toastr from 'toastr'
-import 'toastr/build/toastr.min.css'
+// HAPUS import toastr dari top-level untuk mencegah SSR Error
 
-// Destructure semua property dari useRegister
 const {
   form, steps, currentStep, focused, showPass, showPass2,
   isLoading, success, errorMessage, handleStep,
   strengthClass, strengthTextClass, strengthLabel
 } = useRegister()
 
-// Konfigurasi Toastr
-toastr.options = {
-  "closeButton": true,
-  "progressBar": true,
-  "positionClass": "toast-top-right",
-  "timeOut": "3000",
-  "extendedTimeOut": "1000",
-}
+// Gunakan variabel lokal untuk toastr
+let toast = null
 
-// Watcher untuk Error Message
-watch(errorMessage, (newVal) => {
-  if (newVal) {
-    toastr.error(newVal, 'Pendaftaran Gagal')
+onMounted(async () => {
+  // Import toastr secara dinamis hanya di sisi client
+  const { default: toastr } = await import('toastr')
+  await import('toastr/build/toastr.min.css')
+  
+  toast = toastr
+  toast.options = {
+    "closeButton": true,
+    "progressBar": true,
+    "positionClass": "toast-top-right",
+    "timeOut": "3000"
   }
 })
 
-// Watcher untuk Success (Opsional jika ingin notif selain overlay)
+// Watcher untuk Error Message (Hanya jalankan jika di client dan toast sudah siap)
+watch(errorMessage, (newVal) => {
+  if (newVal && process.client && toast) {
+    toast.error(newVal, 'Pendaftaran Gagal')
+  }
+})
+
+// Watcher untuk Success
 watch(success, (isSuccess) => {
-  if (isSuccess) {
-    toastr.success(`Selamat bergabung, ${form.firstName}!`, 'Berhasil')
+  if (isSuccess && process.client && toast) {
+    toast.success(`Selamat bergabung, ${form.firstName}!`, 'Berhasil')
   }
 })
 
@@ -253,5 +262,5 @@ useHead({ title: 'Daftar — NuxPodman' })
 </script>
 
 <style scoped>
-@import "../../assets/css/register.css";
+@import "~/../assets/css/register.css";
 </style>

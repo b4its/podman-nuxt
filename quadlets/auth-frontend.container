@@ -3,19 +3,22 @@ Description=Nuxt Frontend Dev Service
 
 [Container]
 ContainerName=auth-frontend-dev
-
 Image=localhost/authenticate-frontend:latest
 
-# HUBUNGKAN LAPTOP KE CONTAINER
+# 1. MOUNTING KODE (Host -> Container)
 Volume=/home/markx/programming/rust/cargoRs/nuxt-podman/frontend:/app:Z
+
+# 2. TRIK EXPERT: Lindungi node_modules (PENTING!)
+# Tanpa ini, folder node_modules di container akan hilang tertimpa folder host Anda
+Volume=/app/node_modules
+
+# 3. KONFIGURASI RUNTIME
 WorkingDir=/app
-
-# JALANKAN MODE DEV (Menimpa CMD di Containerfile)
 Exec=bun run dev --host 0.0.0.0
-
 Environment=API_URL=http://auth-backend:8080
 Network=auth.network
 PublishPort=3000:3000
 
 [Install]
-WantedBy=multi-user.target default.target
+# Untuk user session, cukup default.target
+WantedBy=default.target

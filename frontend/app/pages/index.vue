@@ -1,6 +1,5 @@
 <template>
-  <div class="auth-page">
-    <AnimatedBackground />
+  <div class="auth-pages">
 
     <div class="auth-container">
       <!-- Left Panel: Brand -->
@@ -136,8 +135,10 @@
 </template>
 
 <script setup>
+definePageMeta({
+  layout: 'auth'
+})
 import { useLogin } from '../../assets/js/login.js'
-
 // Destructure nilai dari composable
 const {
   form,
